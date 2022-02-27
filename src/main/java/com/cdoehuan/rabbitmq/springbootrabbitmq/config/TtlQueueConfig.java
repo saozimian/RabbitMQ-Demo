@@ -24,6 +24,7 @@ public class TtlQueueConfig {
     // 普通队列名称
     public static final String QUEUE_A = "QA";
     public static final String QUEUE_B = "QB";
+    public static final String QUEUE_C = "QC";
     // 死信队列名称
     public static final String DEAD_LETTER_QUEUE = "QD";
 
@@ -39,10 +40,10 @@ public class TtlQueueConfig {
         return new DirectExchange(Y_DEAD_LETTER_EXCHANGE);
     }
 
-    // 声明队列 TTL =10ms
+    // 声明队列 QA TTL =10ms
     @Bean("queueA")
     public Queue queueA() {
-        Map<String, Object> arguments = new HashMap<>();
+        Map<String, Object> arguments = new HashMap<>(3);
         // 设置死信交换机
         arguments.put("x-dead-letter-exchange", Y_DEAD_LETTER_EXCHANGE);
         // 设置死信routingKey
@@ -52,10 +53,10 @@ public class TtlQueueConfig {
         return QueueBuilder.durable(QUEUE_A).withArguments(arguments).build();
     }
 
-    // 声明队列 TTL = 40ms
+    // 声明队列 QB TTL = 40ms
     @Bean("queueB")
     public Queue queueB() {
-        Map<String, Object> arguments = new HashMap<>();
+        Map<String, Object> arguments = new HashMap<>(3);
         // 设置死信交换机
         arguments.put("x-dead-letter-exchange", Y_DEAD_LETTER_EXCHANGE);
         // 设置死信routingKey
@@ -63,6 +64,18 @@ public class TtlQueueConfig {
         // 设置TTL
         arguments.put("x-message-ttl", 40000);
         return QueueBuilder.durable(QUEUE_B).withArguments(arguments).build();
+    }
+
+    // 声明队列 QC
+    @Bean("queueC")
+    public Queue queueC() {
+        Map<String, Object> arguments = new HashMap<>(2);
+        // 设置死信交换机
+        arguments.put("x-dead-letter-exchange", Y_DEAD_LETTER_EXCHANGE);
+        // 设置死信routingKey
+        arguments.put("x-dead-letter-routing-key", "YD");
+        // 设置TTL
+        return QueueBuilder.durable(QUEUE_C).withArguments(arguments).build();
     }
 
     // 死信队列
@@ -83,6 +96,13 @@ public class TtlQueueConfig {
     public Binding queueBBindingX(@Qualifier("queueB") Queue queueB,
                                   @Qualifier("xExchange") DirectExchange xExchange) {
         return BindingBuilder.bind(queueB).to(xExchange).with("XB");
+    }
+
+    // 绑定 XC
+    @Bean
+    public Binding queueCBindingX(@Qualifier("queueC") Queue queueC,
+                                  @Qualifier("xExchange") DirectExchange xExchange) {
+        return BindingBuilder.bind(queueC).to(xExchange).with("XC");
     }
 
     // 绑定 YD
