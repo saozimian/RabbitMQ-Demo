@@ -20,8 +20,7 @@ public class DeadLetterQueueConsumer {
 
     // 接收消息
     @RabbitListener(queues = "QD")
-    public void receiveD(Message message, Channel channel) {
-
+    public void receiveD(Message message) {
         String msg = new String(message.getBody());
         log.info("当前时间:{},收到死信队列的消息:{}", new Date(), msg);
 

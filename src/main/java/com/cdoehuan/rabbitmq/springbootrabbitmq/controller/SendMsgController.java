@@ -1,5 +1,6 @@
 package com.cdoehuan.rabbitmq.springbootrabbitmq.controller;
 
+import com.cdoehuan.rabbitmq.springbootrabbitmq.config.DelayedQueueConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +36,25 @@ public class SendMsgController {
     // 开始发消息
     @GetMapping("/sendExpriationMsg/{message}/{ttlTime}")
     public void sendMsg(@PathVariable String message, @PathVariable String ttlTime) {
-        log.info("当前时间:{},发送一条时长{}ms的TTL消息给队列QC:{}", new Date(), ttlTime, message);
+        log.info("当前时间:{},发送一条时长{}ms的消息给TTL队列QC:{}", new Date(), ttlTime, message);
         rabbitTemplate.convertAndSend("X", "XC", message, msg -> {
             // 发送消息的时候 延迟时长
             msg.getMessageProperties().setExpiration(ttlTime);
             return msg;
         });
+    }
+
+    // 开始发消息 基于插件的 及延迟时间
+    @GetMapping("/sendDelayMsg/{message}/{delayTime}")
+    public void sendMsg(@PathVariable String message, @PathVariable Integer delayTime) {
+        log.info("当前时间:{},发送一条时长{}ms的消息给延迟队列delayed.queue:{}", new Date(), delayTime, message);
+        rabbitTemplate.convertAndSend(
+                DelayedQueueConfig.DELAYED_EXCHANGE_NAME,
+                DelayedQueueConfig.DELAYED_ROUTING_KEY,
+                message, msg -> {
+                    // 发送消息的时候 延迟时长 ms
+                    msg.getMessageProperties().setDelay(delayTime);
+                    return msg;
+                });
     }
 }
