@@ -4,3 +4,7 @@ spring:
     port: 5672
     password: admin
     username: admin
+#    触发回调方法
+    publisher-confirm-type: CORRELATED
+#    消息回退
+    publisher-returns: true
